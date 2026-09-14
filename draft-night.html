@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Draft Night</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#04201c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Draft Night">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700;900&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #04201c;
+    --surface: #0a332c;
+    --surface-2: #0f4238;
+    --gold: #22D3EE;
+    --coral: #34D399;
+    --teal: #2DD4BF;
+    --cream: #EAFBF6;
+    --muted: #8FC9BE;
+    --line: rgba(234,251,246,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: radial-gradient(ellipse at top, #0d3a33 0%, var(--bg) 60%);
+    color: var(--cream);
+    font-family: 'Work Sans', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,h2,h3{ font-family:'Fraunces', serif; margin:0; }
+  .app{ max-width:480px; margin:0 auto; padding: 28px 18px 60px; min-height:100vh; }
+
+  .brand{ display:flex; align-items:baseline; gap:10px; margin-bottom: 6px;}
+  .brand h1{ font-size: 1.9rem; font-weight:800; letter-spacing:-0.01em; }
+  .brand .dot{ width:10px;height:10px;border-radius:50%; background:var(--coral); box-shadow:0 0 12px var(--coral); }
+  .tagline{ color:var(--muted); font-size:0.95rem; margin-bottom:26px; line-height:1.5; }
+
+  /* setup */
+  .team-box{
+    background:var(--surface); border:1px solid var(--line); border-radius:14px;
+    padding:16px; margin-bottom:12px;
+  }
+  .team-box .label{ color:var(--muted); font-size:0.78rem; margin-bottom:8px; }
+  .team-box input{
+    width:100%; background:transparent; border:none; color:var(--cream);
+    font-family:'Fraunces',serif; font-weight:600; font-size:1.15rem; padding:4px 0; outline:none;
+  }
+  .team-box input::placeholder{ color:var(--muted); font-family:'Work Sans'; font-weight:400; }
+  .budget-note{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--surface-2); border-radius:12px; padding:14px 16px; margin: 6px 0 4px;
+  }
+  .budget-note .l{ color:var(--muted); font-size:0.88rem; }
+  .budget-note .v{ font-family:'Fraunces',serif; color:var(--gold); font-weight:700; font-size:1.2rem; }
+
+  .btn-primary{
+    width:100%; border:none; border-radius:14px; padding:16px;
+    background: linear-gradient(135deg, var(--gold), #0e9bac);
+    color:#04211d; font-weight:700; font-size:1.05rem;
+    font-family:'Work Sans'; cursor:pointer; margin-top:22px;
+    box-shadow: 0 8px 20px rgba(232,163,61,0.25);
+  }
+  .btn-primary:disabled{ opacity:0.4; box-shadow:none; cursor:not-allowed; }
+  .btn-secondary{
+    width:100%; border:1px solid var(--teal); border-radius:14px; padding:14px;
+    background:rgba(79,189,174,0.1); color:var(--teal); font-weight:700; font-size:0.98rem;
+    font-family:'Work Sans'; cursor:pointer; margin-top:12px;
+  }
+  .btn-secondary:disabled{ opacity:0.4; cursor:not-allowed; }
+  .btn-ghost{
+    width:100%; border:1px solid var(--line); border-radius:14px; padding:14px;
+    background:transparent; color:var(--cream); font-weight:600; font-size:0.95rem;
+    font-family:'Work Sans'; cursor:pointer; margin-top:12px;
+  }
+  .hint{ color:var(--muted); font-size:0.82rem; margin-top:10px; }
+
+  /* scoreboard */
+  .scoreboard{ display:flex; gap:10px; margin-bottom:20px; }
+  .score-card{ flex:1; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px; }
+  .score-card.active{ border-color:var(--gold); box-shadow:0 0 0 1px var(--gold) inset; }
+  .score-card .name{ font-family:'Fraunces',serif; font-weight:600; font-size:1rem; }
+  .score-card .bud{ color:var(--teal); font-size:1.3rem; font-weight:700; margin-top:6px; font-family:'Fraunces',serif; }
+  .score-card .items{ color:var(--muted); font-size:0.76rem; margin-top:4px; }
+
+  .section-label{ color:var(--muted); font-size:0.85rem; margin: 4px 0 12px; }
+
+  .cat-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+  .cat-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:14px;
+    padding:16px 14px; cursor:pointer; text-align:left;
+  }
+  .cat-card:active{ transform: scale(0.97); }
+  .cat-card .emoji{ font-size:1.6rem; }
+  .cat-card .name{ font-family:'Fraunces',serif; font-weight:600; font-size:0.95rem; margin-top:8px; }
+  .cat-card .count{ color:var(--muted); font-size:0.78rem; margin-top:4px; }
+  .cat-card.selected-cat{ border-color:var(--gold); box-shadow:0 0 0 1px var(--gold) inset; background:var(--surface-2); }
+
+  /* auction */
+  .item-counter{ text-align:center; color:var(--muted); font-size:0.8rem; margin-bottom:8px; }
+  .up-for-bid{
+    text-align:center; background:var(--surface); border:1px solid var(--line);
+    border-radius:18px; padding:26px 20px; margin-bottom:18px;
+  }
+  .up-for-bid .k{ color:var(--muted); font-size:0.8rem; }
+  .up-for-bid .emoji{ font-size:2.2rem; margin-top:8px; }
+  .up-for-bid .item{ font-family:'Fraunces',serif; font-weight:700; font-size:1.5rem; margin-top:6px; }
+  .up-for-bid .cat{ color:var(--muted); font-size:0.8rem; margin-top:4px; }
+
+  .bid-status{
+    display:flex; justify-content:space-between; align-items:center;
+    background:var(--surface-2); border-radius:12px; padding:14px 18px; margin-bottom:18px;
+  }
+  .bid-status .l{ color:var(--muted); font-size:0.82rem; }
+  .bid-status .v{ font-family:'Fraunces',serif; font-weight:800; font-size:1.4rem; color:var(--gold); }
+  .bid-status .h{ font-size:0.85rem; margin-top:2px; }
+
+  .turn-flag{ text-align:center; font-size:1.05rem; margin-bottom:16px; }
+  .turn-flag span{ color:var(--coral); font-weight:700; }
+
+  .bid-input-row{ display:flex; align-items:center; justify-content:center; gap:16px; margin: 14px 0 6px; }
+  .bid-stepper{
+    width:52px; height:52px; border-radius:50%; border:1px solid var(--line);
+    background:var(--surface); color:var(--cream); font-size:1.5rem; cursor:pointer;
+  }
+  .bid-stepper:disabled{ opacity:0.3; }
+  .bid-amount{ font-family:'Fraunces',serif; font-weight:900; font-size:2.6rem; color:var(--gold); min-width:100px; text-align:center; }
+  .action-row{ display:flex; gap:10px; margin-top:14px; }
+  .action-row .btn-primary, .action-row .btn-ghost{ margin-top:0; }
+
+  .toast{
+    position:fixed; left:50%; bottom:28px; transform:translateX(-50%);
+    background:var(--gold); color:#04211d; padding:12px 20px; border-radius:30px;
+    font-weight:700; font-size:0.9rem; box-shadow:0 10px 24px rgba(0,0,0,0.35);
+    opacity:0; transition: opacity 0.25s ease, bottom 0.25s ease; pointer-events:none;
+    max-width:90%; text-align:center;
+  }
+  .toast.show{ opacity:1; bottom:38px; }
+
+  /* results */
+  .ticket{ background: var(--surface); border:1px solid var(--line); border-radius:16px; margin-bottom:18px; overflow:hidden; }
+  .ticket .head{
+    padding:16px 18px; background: linear-gradient(135deg, var(--coral), #1f9d6f);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .ticket .head h3{ font-size:1.1rem; color:#04211d; }
+  .ticket .head .n{ font-family:'Fraunces',serif; font-weight:900; color:rgba(36,20,50,0.55); font-size:1.3rem; }
+  .ticket .spent{ padding:10px 18px 0; color:var(--muted); font-size:0.82rem; }
+  .ticket .picks{ padding: 6px 18px 16px; }
+  .pick-row{ display:flex; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid var(--line); }
+  .pick-row:last-child{ border-bottom:none; }
+  .pick-row .cat{ color:var(--muted); font-size:0.8rem; }
+  .pick-row .item{ font-weight:600; text-align:right; }
+  .pick-row .paid{ color:var(--gold); font-weight:700; font-size:0.85rem; white-space:nowrap; }
+  .pick-main{ display:flex; flex-direction:column; }
+
+  .judge-box{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px; margin-bottom:18px; }
+  .judge-box h3{ font-size:1.05rem; margin-bottom:10px; }
+  .verdict{ background:var(--surface-2); border-radius:12px; padding:14px 16px; margin-top:14px; }
+  .verdict .win{ font-family:'Fraunces',serif; font-weight:700; color:var(--gold); font-size:1.1rem; }
+  .verdict .reason{ color:var(--cream); font-size:0.9rem; margin-top:6px; line-height:1.5; }
+  .manual-row{ display:flex; gap:8px; margin-top:10px; }
+  .manual-row button{
+    flex:1; background:var(--surface-2); border:1px solid var(--line); border-radius:10px;
+    padding:10px 6px; color:var(--cream); font-size:0.82rem; font-weight:600; cursor:pointer; font-family:'Work Sans';
+  }
+  .manual-row button.picked{ border-color:var(--gold); color:var(--gold); }
+  .spinner{ display:inline-block; width:14px; height:14px; border:2px solid rgba(232,163,61,0.3); border-top-color:var(--gold); border-radius:50%; animation:spin .7s linear infinite; margin-right:8px; vertical-align:-2px; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .screen{ animation: fade .3s ease; }
+  @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  /* duel bidding screen */
+  .duel-screen{
+    position:fixed; inset:0; display:flex; z-index:10;
+    background: radial-gradient(ellipse at 50% 35%, #0a2e29 0%, #041412 75%);
+    overflow:hidden;
+  }
+  .duel-stars{
+    position:absolute; inset:0; opacity:0.5; pointer-events:none;
+    background-image:
+      radial-gradient(1.4px 1.4px at 10% 15%, #fff, transparent),
+      radial-gradient(1px 1px at 30% 65%, #fff, transparent),
+      radial-gradient(1.6px 1.6px at 55% 25%, #fff, transparent),
+      radial-gradient(1px 1px at 75% 80%, #fff, transparent),
+      radial-gradient(1.2px 1.2px at 90% 35%, #fff, transparent),
+      radial-gradient(1px 1px at 20% 90%, #fff, transparent),
+      radial-gradient(1.3px 1.3px at 65% 55%, #fff, transparent),
+      radial-gradient(1px 1px at 85% 10%, #fff, transparent);
+    background-repeat: repeat; background-size: 260px 260px;
+  }
+  .duel-panel{
+    width:28%; min-width:180px; max-width:320px; display:flex; flex-direction:column;
+    padding:16px; gap:10px; position:relative; z-index:1; transition: opacity 0.25s ease;
+  }
+  .duel-panel.inactive{ opacity:0.4; }
+  .duel-panel.inactive .duel-controls{ pointer-events:none; }
+  .duel-header{
+    border-radius:12px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center;
+    font-weight:800; letter-spacing:0.04em; text-transform:uppercase; font-size:0.85rem;
+  }
+  .duel-header.t0{ background: linear-gradient(135deg, #0e7490, #0b4a5c); color:#dff8fc; }
+  .duel-header.t1{ background: linear-gradient(135deg, #15803d, #14532d); color:#e5fbea; }
+  .duel-header .budget{ font-family:'Fraunces',serif; font-weight:900; font-size:1.25rem; }
+  .duel-slots{ flex:1; display:flex; flex-direction:column; gap:7px; min-height:0; }
+  .duel-slot{
+    flex:1; border:1px solid rgba(255,255,255,0.12); border-radius:10px; position:relative;
+    padding:8px 10px; background:rgba(255,255,255,0.02); display:flex; align-items:center;
+    justify-content:center; text-align:center; overflow:hidden;
+  }
+  .duel-slot.filled{ border-color: rgba(232,163,61,0.55); background:rgba(232,163,61,0.08); }
+  .duel-slot .num{ position:absolute; top:6px; left:9px; font-size:0.7rem; color:rgba(245,239,230,0.32); font-weight:700; }
+  .duel-slot .plus{ font-size:1.3rem; color:rgba(245,239,230,0.18); }
+  .duel-slot .won-item{ font-weight:700; font-size:0.78rem; line-height:1.25; }
+  .duel-slot .won-paid{ color:var(--gold); font-size:0.7rem; margin-top:3px; font-weight:700; }
+  .duel-controls{ display:flex; flex-direction:column; gap:8px; }
+  .duel-stepper-row{ display:flex; align-items:center; justify-content:center; gap:14px; }
+  .duel-step-btn{
+    width:38px; height:38px; border-radius:50%; border:1px solid rgba(255,255,255,0.15);
+    background:rgba(255,255,255,0.06); color:#fff; font-size:1.15rem; cursor:pointer;
+  }
+  .duel-step-btn:disabled{ opacity:0.3; }
+  .duel-amount{ font-weight:800; font-size:1.05rem; min-width:36px; text-align:center; color:var(--cream); }
+  .duel-action-row{ display:flex; gap:8px; }
+  .duel-btn{
+    flex:1; border:none; border-radius:10px; padding:12px 6px; font-weight:800;
+    text-transform:uppercase; letter-spacing:0.02em; font-size:0.78rem; cursor:pointer; font-family:'Work Sans';
+  }
+  .duel-btn.bid{ background:#06B6D4; color:#04211d; }
+  .duel-btn.bid:disabled{ opacity:0.35; cursor:not-allowed; }
+  .duel-btn.pass{ background:#2f6b52; color:#EAFBF6; }
+  .duel-center{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:20px; position:relative; z-index:1;
+  }
+  .duel-item-count{ color:var(--muted); font-size:0.78rem; margin-bottom:14px; letter-spacing:0.04em; }
+  .duel-cat-label{
+    display:flex; align-items:center; gap:8px; color:#7fd9c4; text-transform:uppercase;
+    letter-spacing:0.12em; font-weight:700; font-size:0.85rem;
+  }
+  .duel-item-name{ font-family:'Fraunces',serif; font-weight:800; font-size:2.3rem; margin:10px 0 20px; line-height:1.1; }
+  .duel-caption{ color:#7fd9c4; text-transform:uppercase; letter-spacing:0.05em; font-size:0.78rem; font-weight:700; }
+  .duel-bid-amount{ font-family:'Fraunces',serif; font-weight:900; font-size:3rem; color:var(--gold); margin:6px 0; }
+  .duel-status{ text-transform:uppercase; letter-spacing:0.06em; font-weight:700; color:var(--gold); font-size:0.82rem; }
+  .duel-toast{
+    position:absolute; top:18px; left:50%; transform:translateX(-50%); z-index:2;
+    background:var(--gold); color:#04211d; padding:10px 20px; border-radius:30px;
+    font-weight:700; font-size:0.85rem; box-shadow:0 10px 24px rgba(0,0,0,0.35);
+    opacity:0; transition: opacity 0.25s ease; pointer-events:none; max-width:80%; text-align:center;
+  }
+  .duel-toast.show{ opacity:1; }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+const CATEGORIES = {
+  snacks:   { emoji:"🍿", name:"Movie Night Snacks", items:["Popcorn","Nachos","Gummy bears","Milk duds","Soft pretzel","Churros","Ice cream sandwich","Cheese fries","Pigs in a blanket","Soft serve","Twizzlers","Skittles","M&Ms","Sour Patch Kids","Cotton candy","Caramel corn","Chocolate-covered pretzels","Candy corn","Popcorn chicken","Pretzel bites"] },
+  powers:   { emoji:"🦸", name:"Superpowers", items:["Flight","Invisibility","Time travel","Mind reading","Teleportation","Shape-shifting","Super strength","Healing touch","Weather control","X-ray vision","Super speed","Telekinesis","Elemental control","Immortality","Size shifting","Energy blasts","Animal communication","Precognition","Density control","Duplication"] },
+  karaoke:  { emoji:"🎤", name:"Karaoke Songs", items:["Bohemian Rhapsody","Don't Stop Believin'","I Will Survive","Livin' on a Prayer","Since U Been Gone","Total Eclipse of the Heart","Sweet Caroline","Mr. Brightside","Africa","Dancing Queen","Wannabe","I Want It That Way","My Heart Will Go On","Shake It Off","Uptown Funk","Rolling in the Deep","Friday I'm in Love","Let It Go","September","Piano Man"] },
+  pizza:    { emoji:"🍕", name:"Pizza Toppings", items:["Pepperoni","Mushrooms","Pineapple","Extra cheese","BBQ chicken","Jalapeños","Olives","Sausage","Bacon","Banana peppers","Ham","Onions","Spinach","Feta cheese","Buffalo chicken","Ground beef","Artichoke hearts","Sun-dried tomatoes","Ricotta","Anchovies"] },
+  vacay:    { emoji:"🏝️", name:"Vacation Spots", items:["Bali","Iceland","Tokyo","Santorini","Costa Rica","New Zealand","Marrakech","Maldives","Lisbon","Kyoto","Rome","Cancun","Swiss Alps","Amalfi Coast","Phuket","Machu Picchu","Banff","Prague","Seville","Bora Bora"] },
+  icecream: { emoji:"🍦", name:"Ice Cream Flavors", items:["Mint chip","Cookie dough","Pistachio","Salted caramel","Rocky road","Mango sorbet","Birthday cake","Cookies and cream","Butter pecan","Strawberry","Vanilla bean","Chocolate fudge","Neapolitan","Coffee","Coconut","Peanut butter cup","Black raspberry","Lemon sorbet","Bubblegum","Pumpkin spice"] },
+  games:    { emoji:"🎲", name:"Party Games", items:["Charades","Mafia","Pictionary","Truth or Dare","Never Have I Ever","Twister","Jenga","Beer pong","Catchphrase","Codenames","Heads Up","Cards Against Humanity","Uno","Taboo","Would You Rather","Spoons","Scattergories","Werewolf","Flip Cup","Apples to Apples"] },
+  dance:    { emoji:"💃", name:"Dance Moves", items:["The Robot","Moonwalk","Floss","Running Man","Dab","Sprinkler","The Worm","Shopping Cart","Dougie","Macarena","Cha Cha Slide","Electric Slide","The Whip","Nae Nae","Wobble","Cupid Shuffle","Vogue","Twerk","Salsa","Breakdance"] },
+  roadtrip: { emoji:"🎧", name:"Road Trip Playlist", items:["Summer anthem","90s throwback","Power ballad","One-hit wonder","Sing-along classic","Guilty pleasure","Air guitar solo","Windows-down banger","Sad boy hour track","Karaoke closer","Classic rock cruiser","Early 2000s pop","Boy band throwback","Country cruiser","Hype hip-hop track","Feel-good indie","Late-night chill track","Nostalgic Disney tune","Road-trip duet","Encore song"] },
+  wildcard: { emoji:"🦖", name:"Wildcard Talents", items:["Whistle a tune","Juggle anything","Do impressions","Card tricks","Rap a verse","Beatbox","Freestyle rhyme","Crack an egg one-handed","Solve a Rubik's cube","Moonwalk on command","Recite the alphabet backwards","Balance a spoon on your nose","Draw with your eyes closed","Yo-yo tricks","Speed-talk a tongue twister","Air-drum a solo","Do a handstand","Flip a water bottle","Impersonate an animal","Moonwalk while singing"] },
+  soccer:   { emoji:"⚽", name:"Soccer Players", items:["Lionel Messi","Cristiano Ronaldo","Kylian Mbappé","Erling Haaland","Kevin De Bruyne","Vinícius Júnior","Jude Bellingham","Mohamed Salah","Luka Modrić","Neymar Jr.","Karim Benzema","Robert Lewandowski","Harry Kane","Bukayo Saka","Phil Foden","Rodri","Bruno Fernandes","Son Heung-min","Achraf Hakimi","Victor Osimhen","Thibaut Courtois","Alisson Becker","Marc-André ter Stegen","Rafael Leão","Federico Valverde"] },
+  unstablesmp: { emoji:"⛏️", name:"Unstable SMP Characters", items:["Wemmbu","Flamefrags","ParrotX2","SpokeIsHere","Eggchan","Theobald","Purpled","Clownpierce","Saparata","Ashswagg","Lamidi","Mapick","FerreMC","The Wraith","Rejoicin","JumperWho","Wifies","The_Ouruboros"] },
+  videogames: { emoji:"🎮", name:"Video Games", items:["Minecraft","Fortnite","Grand Theft Auto V","Call of Duty","The Legend of Zelda: Breath of the Wild","The Last of Us","Elden Ring","Among Us","Roblox","Valorant","Overwatch 2","League of Legends","Apex Legends","Super Mario Odyssey","Red Dead Redemption 2","Animal Crossing: New Horizons","EA Sports FC","Rocket League","Hades","Stardew Valley"] },
+  socialmedia: { emoji:"📱", name:"Social Media Apps", items:["TikTok","Instagram","Snapchat","X (Twitter)","YouTube","BeReal","Discord","Pinterest","Reddit","LinkedIn","Facebook","WhatsApp","Threads","Twitch","Telegram","Tumblr","Bluesky","WeChat","Clubhouse","VSCO"] },
+  drinks: { emoji:"🥤", name:"Types of Drinks", items:["Iced coffee","Boba tea","Lemonade","Margarita","Mojito","Sprite","Energy drink","Hot chocolate","Smoothie","Sparkling water","Matcha latte","Root beer","Piña colada","Old fashioned","Chai tea","Orange juice","Coca-Cola","Espresso martini","Milkshake","Kombucha"] },
+  youtubers: { emoji:"📹", name:"YouTubers", items:["MrBeast","PewDiePie","Markiplier","KSI","Logan Paul","IShowSpeed","Mark Rober","Dude Perfect","Emma Chamberlain","Airrack","Jacksepticeye","Ninja","Casey Neistat","Zach King","Ryan Trahan","Kai Cenat","Rhett & Link","Safiya Nygaard","Unspeakable","Dream"] },
+  fortnite: { emoji:"🪂", name:"Fortnite Seasons", items:["Chapter 7, Season 4: Override","Chapter 7, Season 3: Runners","Chapter 7, Season 2: Showdown","Chapter 7, Season 1: Pacific Break","Chapter 6, Season 4: Shock 'N Awesome","Chapter 6, Season 3: Super","Chapter 6, Season 2: Lawless","Chapter 6, Season 1: Hunters","Chapter 6, Mini-Season 1: Galactic Battle","Chapter 6, Mini-Season 2: Fortnite x The Simpsons","Chapter 5, Season 4: Absolute Doom","Chapter 5, Season 3: Wrecked","Chapter 5, Season 2: Myths & Mortals","Chapter 5, Season 1: Underground"] },
+  cities: { emoji:"🌆", name:"Cities to Visit", items:["Paris","Tokyo","New York City","Rome","Barcelona","London","Dubai","Sydney","Bangkok","Cape Town","Singapore","Istanbul","Rio de Janeiro","Amsterdam","Venice","Hong Kong","Vienna","Seoul","Mexico City","Buenos Aires"] },
+  soccerteams: { emoji:"🏆", name:"Football / Soccer Teams", items:["Real Madrid","FC Barcelona","Manchester United","Manchester City","Liverpool","Bayern Munich","Paris Saint-Germain","Juventus","Chelsea","Arsenal","Tottenham Hotspur","AC Milan","Inter Milan","Borussia Dortmund","Atletico Madrid","Ajax","Napoli","Newcastle United","Sevilla","Porto"] },
+  months: { emoji:"📅", name:"Months", items:["January","February","March","April","May","June","July","August","September","October","November","December"] },
+  mctiers: { emoji:"⚔️", name:"MC Tiers Top Players", items:["Technoblade","Purpled","Illumina","Antfrost","Vezalii","Fruitberries","TapL","ArchMoose","Sapnap","Skeppy","BadBoyHalo","Quackity","Tubbo","Ranboo","Wilbur Soot","Philza","CaptainSparklez","GeorgeNotFound","Grian","PeteZahHutt"] },
+  years: { emoji:"🗓️", name:"Years (2014-2026)", items:["2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025","2026"] },
+  mcdonaldsegypt: { emoji:"🍟", name:"McDonald's Menu (Egypt)", items:["Big Mac","Big Tasty","McRoyale","McDouble","Cheeseburger","Beefburger","McChicken","Chicken Mac","Grand Chicken Premier","McArabia","McFalafel","Chicken Fillet","McNuggets (9 pc)","Filet-O-Fish","McFries","Oreo McFlurry","Apple Pie","Egg McMuffin","Hash Browns","Big Breakfast"] },
+};
+const BUDGET = 20;
+const ROSTER_CAP = 5;
+const DRAFT_ITEM_COUNT = 10;
+
+let state = initialState();
+
+function initialState(){
+  return {
+    screen: "setup",          // setup | auction | results
+    teamNames: ["", ""],
+    teams: [],                 // {name, budget, picks:[{cat,item,paid}]}
+    selectedCategory: null,
+    itemPool: [],                // full shuffled category pool to draw from
+    poolIndex: 0,
+    currentItem: null,
+    wonCount: 0,                 // items successfully won so far (toward DRAFT_ITEM_COUNT)
+    highestBid: 0,
+    highestBidder: null,
+    active: [true, true],
+    turn: 0,
+    bidDraft: 0,
+    toast: "",
+    judging: false,
+    verdict: null,               // {winner: 0|1|"tie", reason}
+    manualPick: null
+  };
+}
+
+function shuffledSample(arr, count){
+  const copy = [...arr];
+  for(let i = copy.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy.slice(0, count);
+}
+
+function render(){
+  const app = document.getElementById("app");
+  if(state.screen === "setup") app.innerHTML = renderSetup();
+  else if(state.screen === "auction") app.innerHTML = renderAuction();
+  else app.innerHTML = renderResults();
+  attachHandlers();
+}
+
+function renderSetup(){
+  const catEntries = Object.entries(CATEGORIES);
+  const chosen = state.selectedCategory ? CATEGORIES[state.selectedCategory] : null;
+
+  return `
+    <div class="screen">
+      <div class="brand"><div class="dot"></div><h1>Draft Night</h1></div>
+      <div class="tagline">Two teams, a $${BUDGET} budget each. Pick a category, then take turns bidding or passing until every item is claimed.</div>
+
+      <div class="team-box">
+        <div class="label">Team 1</div>
+        <input type="text" id="team0" placeholder="Team name" value="${escapeHtml(state.teamNames[0])}" />
+      </div>
+      <div class="team-box">
+        <div class="label">Team 2</div>
+        <input type="text" id="team1" placeholder="Team name" value="${escapeHtml(state.teamNames[1])}" />
+      </div>
+
+      <div class="budget-note">
+        <div class="l">Starting budget, each team</div>
+        <div class="v">$${BUDGET}</div>
+      </div>
+
+      <div class="section-label" style="margin-top:20px;">Pick one category to bid on</div>
+      <div class="cat-grid">
+        ${catEntries.map(([key, cat]) => `
+          <div class="cat-card ${state.selectedCategory === key ? "selected-cat" : ""}" data-cat="${key}">
+            <div class="emoji">${cat.emoji}</div>
+            <div class="name">${cat.name}</div>
+            <div class="count">${cat.items.length} in pool</div>
+          </div>
+        `).join("")}
+      </div>
+
+      <button class="btn-primary" id="startDraft" ${chosen ? "" : "disabled"}>${chosen ? `Start bidding on ${chosen.name}` : "Pick a category first"}</button>
+      <div class="hint">Every game goes until ${DRAFT_ITEM_COUNT} items are won — enough for each team to fill a full roster of ${ROSTER_CAP}. If both teams pass on an item, it doesn't count — a new one takes its place.</div>
+    </div>
+  `;
+}
+
+function scoreboard(highlightIdx){
+  return `
+    <div class="scoreboard">
+      ${state.teams.map((t,i) => `
+        <div class="score-card ${i===highlightIdx ? "active" : ""}">
+          <div class="name">${escapeHtml(t.name)}</div>
+          <div class="bud">$${t.budget}</div>
+          <div class="items">${t.picks.length} / ${ROSTER_CAP} won</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderAuction(){
+  const cat = CATEGORIES[state.selectedCategory];
+  const item = state.currentItem;
+  const trueMin = state.highestBid + 1;
+  const turnTeam = state.teams[state.turn];
+  const maxBid = turnTeam.budget;
+  if(state.bidDraft < trueMin) state.bidDraft = Math.min(trueMin, Math.max(maxBid, trueMin));
+  const canBid = maxBid >= trueMin;
+
+  const caption = state.highestBid === 0
+    ? `Opening bid from ${escapeHtml(turnTeam.name)}`
+    : `Current bid`;
+  const centerAmount = state.highestBid === 0 ? state.bidDraft : state.highestBid;
+  const statusLine = state.highestBid === 0
+    ? "No bids yet"
+    : `${escapeHtml(state.teams[state.highestBidder].name)} is winning`;
+
+  return `
+    <div class="duel-screen">
+      <div class="duel-stars"></div>
+      ${duelPanel(0)}
+      <div class="duel-center">
+        <div class="duel-item-count">${state.wonCount} of ${DRAFT_ITEM_COUNT} won</div>
+        <div class="duel-cat-label">${cat.emoji} ${cat.name}</div>
+        <div class="duel-item-name">${escapeHtml(item)}</div>
+        <div class="duel-caption">${caption}</div>
+        <div class="duel-bid-amount">$${centerAmount}</div>
+        <div class="duel-status">${statusLine}</div>
+      </div>
+      ${duelPanel(1)}
+      <div class="duel-toast ${state.toast ? "show" : ""}">${state.toast}</div>
+    </div>
+  `;
+}
+
+function duelPanel(teamIdx){
+  const team = state.teams[teamIdx];
+  const isTurn = state.turn === teamIdx;
+  const trueMin = state.highestBid + 1;
+  const maxBid = team.budget;
+  const amount = isTurn ? state.bidDraft : Math.min(trueMin, Math.max(maxBid, trueMin));
+  const canBid = isTurn && maxBid >= trueMin;
+
+  const slots = Array.from({length: ROSTER_CAP}, (_, i) => {
+    const pick = team.picks[i];
+    if(pick){
+      return `<div class="duel-slot filled"><div class="num">${i+1}</div><div><div class="won-item">${escapeHtml(pick.item)}</div><div class="won-paid">$${pick.paid}</div></div></div>`;
+    }
+    return `<div class="duel-slot"><div class="num">${i+1}</div><div class="plus">+</div></div>`;
+  }).join("");
+
+  return `
+    <div class="duel-panel ${isTurn ? "" : "inactive"}">
+      <div class="duel-header t${teamIdx}">
+        <span>${escapeHtml(team.name)}</span>
+        <span class="budget">$${team.budget}</span>
+      </div>
+      <div class="duel-slots">${slots}</div>
+      <div class="duel-controls">
+        <div class="duel-stepper-row">
+          <button class="duel-step-btn" data-team="${teamIdx}" data-dir="down" ${!isTurn || amount <= trueMin ? "disabled" : ""}>–</button>
+          <div class="duel-amount">$${amount}</div>
+          <button class="duel-step-btn" data-team="${teamIdx}" data-dir="up" ${!isTurn || amount >= maxBid ? "disabled" : ""}>+</button>
+        </div>
+        <div class="duel-action-row">
+          <button class="duel-btn pass" data-team="${teamIdx}" data-action="pass" ${isTurn ? "" : "disabled"}>Pass</button>
+          <button class="duel-btn bid" data-team="${teamIdx}" data-action="bid" ${canBid ? "" : "disabled"}>Bid $${amount}</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderResults(){
+  const tickets = state.teams.map((t, i) => `
+    <div class="ticket">
+      <div class="head"><h3>${escapeHtml(t.name)}</h3><div class="n">#${i+1}</div></div>
+      <div class="spent">$${BUDGET - t.budget} spent · $${t.budget} left</div>
+      <div class="picks">
+        ${t.picks.length ? t.picks.map(pk => `
+          <div class="pick-row">
+            <div class="pick-main">
+              <div class="item">${escapeHtml(pk.item)}</div>
+            </div>
+            <div class="paid">$${pk.paid}</div>
+          </div>
+        `).join("") : `<div class="pick-row"><div class="cat">No items won</div></div>`}
+      </div>
+    </div>
+  `).join("");
+
+  let judgeBody;
+  if(state.verdict){
+    const winText = state.verdict.winner === "tie" ? "It's a tie" : `${escapeHtml(state.teams[state.verdict.winner].name)} wins`;
+    judgeBody = `
+      <div class="verdict">
+        <div class="win">${winText}</div>
+        <div class="reason">${escapeHtml(state.verdict.reason)}</div>
+      </div>
+    `;
+  } else if(state.manualPick !== null){
+    const winText = state.manualPick === "tie" ? "Tie" : escapeHtml(state.teams[state.manualPick].name);
+    judgeBody = `<div class="verdict"><div class="win">${winText} wins the argument</div></div>`;
+  } else {
+    judgeBody = `
+      <button class="btn-primary" id="aiJudge" ${state.judging ? "disabled" : ""}>${state.judging ? '<span class="spinner"></span>Judging...' : "Let AI judge"}</button>
+      <div class="section-label" style="text-align:center; margin-top:14px;">or decide yourselves</div>
+      <div class="manual-row">
+        ${state.teams.map((t,i) => `<button data-pick="${i}">${escapeHtml(t.name)}</button>`).join("")}
+        <button data-pick="tie">Tie</button>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="screen">
+      <div class="brand"><div class="dot"></div><h1>Draft Night</h1></div>
+      <div class="tagline">The bidding war is over. Here's who won what.</div>
+      ${tickets}
+      <div class="judge-box">
+        <h3>Who won the argument?</h3>
+        ${judgeBody}
+      </div>
+      <button class="btn-ghost" id="newDraft">Start a new bidding war</button>
+    </div>
+    <div class="toast ${state.toast ? "show" : ""}">${state.toast}</div>
+  `;
+}
+
+function attachHandlers(){
+  const t0 = document.getElementById("team0");
+  const t1 = document.getElementById("team1");
+  if(t0) t0.addEventListener("input", e => state.teamNames[0] = e.target.value);
+  if(t1) t1.addEventListener("input", e => state.teamNames[1] = e.target.value);
+
+  if(state.screen === "setup"){
+    document.querySelectorAll(".cat-card").forEach(el => {
+      el.addEventListener("click", e => {
+        state.selectedCategory = e.currentTarget.dataset.cat;
+        render();
+      });
+    });
+  }
+
+  const startBtn = document.getElementById("startDraft");
+  if(startBtn) startBtn.addEventListener("click", () => {
+    if(!state.selectedCategory) return;
+    const n0 = state.teamNames[0].trim() || "Team 1";
+    const n1 = state.teamNames[1].trim() || "Team 2";
+    const catItems = CATEGORIES[state.selectedCategory].items;
+    state.teams = [
+      { name: n0, budget: BUDGET, picks: [] },
+      { name: n1, budget: BUDGET, picks: [] }
+    ];
+    state.itemPool = shuffledSample(catItems, catItems.length);
+    state.poolIndex = 1;
+    state.currentItem = state.itemPool[0];
+    state.wonCount = 0;
+    resetItemAuction();
+    state.screen = "auction";
+    render();
+  });
+
+  document.querySelectorAll(".duel-step-btn").forEach(el => {
+    el.addEventListener("click", e => {
+      const teamIdx = parseInt(e.currentTarget.dataset.team, 10);
+      if(teamIdx !== state.turn) return;
+      const maxBid = state.teams[state.turn].budget;
+      const trueMin = state.highestBid + 1;
+      if(e.currentTarget.dataset.dir === "up"){
+        state.bidDraft = Math.min(maxBid, state.bidDraft + 1);
+      } else {
+        state.bidDraft = Math.max(trueMin, state.bidDraft - 1);
+      }
+      render();
+    });
+  });
+  document.querySelectorAll(".duel-btn").forEach(el => {
+    el.addEventListener("click", e => {
+      const teamIdx = parseInt(e.currentTarget.dataset.team, 10);
+      if(teamIdx !== state.turn) return;
+      if(e.currentTarget.dataset.action === "bid") handleBid();
+      else handlePass();
+    });
+  });
+
+  const aiJudge = document.getElementById("aiJudge");
+  if(aiJudge) aiJudge.addEventListener("click", () => runAiJudge());
+
+  document.querySelectorAll("[data-pick]").forEach(el => {
+    el.addEventListener("click", e => {
+      const p = e.currentTarget.dataset.pick;
+      state.manualPick = p === "tie" ? "tie" : parseInt(p, 10);
+      render();
+    });
+  });
+
+  const newBtn = document.getElementById("newDraft");
+  if(newBtn) newBtn.addEventListener("click", () => {
+    state = initialState();
+    render();
+  });
+}
+
+function resetItemAuction(){
+  state.highestBid = 0;
+  state.highestBidder = null;
+  state.active = [state.teams[0].picks.length < ROSTER_CAP, state.teams[1].picks.length < ROSTER_CAP];
+  let starter = state.poolIndex % 2;
+  if(!state.active[starter]) starter = 1 - starter;
+  state.turn = starter;
+  state.bidDraft = 1;
+}
+
+function handleBid(){
+  const team = state.turn;
+  const amt = state.bidDraft;
+  if(amt > state.teams[team].budget || amt <= state.highestBid) return;
+  state.highestBid = amt;
+  state.highestBidder = team;
+  const other = 1 - team;
+  if(!state.active[other]){
+    finalizeItem(team, amt);
+  } else {
+    state.turn = other;
+    state.bidDraft = state.highestBid + 1;
+  }
+  render();
+}
+
+function handlePass(){
+  const team = state.turn;
+  state.active[team] = false;
+  const other = 1 - team;
+  if(!state.active[other]){
+    finalizeItem(null, 0);
+  } else if(state.highestBid > 0){
+    finalizeItem(other, state.highestBid);
+  } else {
+    state.turn = other;
+    state.bidDraft = 1;
+  }
+  render();
+}
+
+function finalizeItem(winnerIdx, amount){
+  const item = state.currentItem;
+  if(winnerIdx !== null){
+    state.teams[winnerIdx].budget -= amount;
+    state.teams[winnerIdx].picks.push({ cat: state.selectedCategory, item, paid: amount });
+    state.toast = `${state.teams[winnerIdx].name} won ${item} for $${amount}!`;
+    state.wonCount += 1;
+  } else {
+    state.toast = `${item} went unclaimed — next item up.`;
+  }
+  const bothCapped = state.teams[0].picks.length >= ROSTER_CAP && state.teams[1].picks.length >= ROSTER_CAP;
+  const poolExhausted = state.poolIndex >= state.itemPool.length;
+  if(bothCapped || state.wonCount >= DRAFT_ITEM_COUNT || poolExhausted){
+    state.screen = "results";
+  } else {
+    state.currentItem = state.itemPool[state.poolIndex];
+    state.poolIndex += 1;
+    resetItemAuction();
+  }
+  setTimeout(() => {
+    const t = document.querySelector(".duel-toast");
+    if(t) t.classList.remove("show");
+  }, 1800);
+}
+
+async function runAiJudge(){
+  state.judging = true;
+  render();
+  const cat = CATEGORIES[state.selectedCategory];
+  const rosterText = state.teams.map(t =>
+    `${t.name} (spent $${BUDGET - t.budget}): ${t.picks.map(p => `${p.item} ($${p.paid})`).join(", ") || "nothing"}`
+  ).join("\n");
+
+  const prompt = `You're judging a party drafting game. Category: "${cat.name}". Two teams bid on items with a $${BUDGET} budget each. Here are the final rosters:\n${rosterText}\n\nDecide which team built the better lineup (or call it a tie). Respond ONLY with JSON, no markdown, no preamble: {"winner": "0" or "1" or "tie", "reason": "one playful sentence, under 25 words"}`;
+
+  try{
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+    const data = await response.json();
+    const text = (data.content || []).map(b => b.text || "").join("").trim();
+    const clean = text.replace(/```json|```/g, "").trim();
+    const parsed = JSON.parse(clean);
+    const winner = parsed.winner === "tie" ? "tie" : parseInt(parsed.winner, 10);
+    state.verdict = { winner, reason: parsed.reason || "" };
+  } catch(err){
+    state.toast = "AI judge couldn't decide — pick manually instead.";
+    setTimeout(() => {
+      const t = document.querySelector(".toast");
+      if(t) t.classList.remove("show");
+    }, 2200);
+  } finally {
+    state.judging = false;
+    render();
+  }
+}
+
+function escapeHtml(str){
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+render();
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
